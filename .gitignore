@@ -1,0 +1,7 @@
+# Ignore dependencies
+node_modules/
+
+# Optional:
+.env
+.DS_Store
+dist/

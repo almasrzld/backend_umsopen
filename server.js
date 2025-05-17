@@ -1,18 +1,24 @@
-const express = require("express");
-const cors = require("cors");
-const dotenv = require("dotenv");
-const connectDB = require("./config/db");
-const authRoutes = require("./routes/authRoutes");
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import routes from "./routes/index.js";
+import { errorHandler } from "./middlewares/error-handler.js";
+import { startCleanupJob } from "./utils/cron-participant.js";
 
 dotenv.config();
-connectDB();
 
 const app = express();
-
-app.use(cors({ origin: "http://localhost:3001", credentials: true }));
-app.use(express.json());
-
-app.use("/v1/api/auth", authRoutes);
-
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+startCleanupJob();
+
+app.use(express.json());
+app.use(cors());
+
+app.use(routes);
+
+app.use(errorHandler);
+
+app.listen(PORT, () => {
+  console.log(`⚡️[server]: Server is running at http://localhost:${PORT}`);
+});

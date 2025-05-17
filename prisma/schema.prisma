@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  v        Int    @map("__v")
+  email    String @unique(map: "email_1")
+  password String
+
+  @@map("admins")
+}
+
+model Counter {
+  id   String @id @default(auto()) @map("_id") @db.ObjectId
+  v    Int    @map("__v")
+  name String @unique
+  seq  Int
+
+  @@map("counters")
+}
+
+model Participant {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  v                 Int      @map("__v")
+  user_kode         String?  @unique
+  orderId           String?
+  user_name         String?
+  user_email        String?
+  user_phone        String?
+  user_category     String?
+  user_institution  String?
+  user_message      String?
+  status            transactions_status
+  snap_token        String?             
+  snap_redirect_url String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @default(now())
+
+  @@index([createdAt], map: "createdAt_idx")
+  @@map("participant")
+}
+
+enum transactions_status {
+  PENDING_PAYMENT
+  PAID
+  CANCELED
+}
