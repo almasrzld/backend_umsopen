@@ -19,7 +19,7 @@ export const validateParticipant = [
     .withMessage("Email harus berupa email yang valid"),
 
   check("user_phone")
-    .isMobilePhone("id-ID") // Assuming Indonesian phone numbers
+    .matches(/^(08|\+628|628)[0-9]{7,12}$/)
     .withMessage(
       "Nomor telepon harus berupa nomor telepon Indonesia yang valid"
     ),

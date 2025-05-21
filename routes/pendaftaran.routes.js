@@ -4,6 +4,7 @@ import {
   getTransactions,
   getTransactionById,
   updateTransactionStatus,
+  trxNotif,
 } from "../features/pendaftaran/index.js";
 import {
   validateParticipant,
@@ -21,5 +22,6 @@ router.put(
   validateParticipantStatus,
   catchAsync(updateTransactionStatus)
 );
+router.post("/notification", catchAsync(trxNotif));
 
 export default router;

@@ -49,16 +49,33 @@ class ParticipantService {
     });
   }
 
-  async getTransactions({ status }) {
-    let where = {};
-    if (status) {
-      where = {
-        status,
-      };
-    }
-    return prisma.participant.findMany({
-      where,
-    });
+  async getTransactions({ page = 1, limit = 10, search = "", status }) {
+    const where = {
+      ...(status && status !== "ALL" ? { status } : {}),
+      ...(search
+        ? {
+            OR: [
+              { user_name: { contains: search, mode: "insensitive" } },
+              { user_email: { contains: search, mode: "insensitive" } },
+              { user_institution: { contains: search, mode: "insensitive" } },
+            ],
+          }
+        : {}),
+    };
+
+    const skip = (page - 1) * limit;
+
+    const [data, total] = await Promise.all([
+      prisma.participant.findMany({
+        where,
+        skip,
+        take: Number(limit),
+        orderBy: { createdAt: "desc" },
+      }),
+      prisma.participant.count({ where }),
+    ]);
+
+    return { data, total };
   }
 
   async getTransactionById({ orderId }) {
