@@ -37,6 +37,7 @@ model Participant {
   user_institution  String?
   user_message      String?
   status            transactions_status
+  photo             String?
   snap_token        String?             
   snap_redirect_url String?
   createdAt         DateTime @default(now())

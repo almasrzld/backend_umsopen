@@ -11,10 +11,16 @@ import {
   validateParticipantStatus,
 } from "../features/pendaftaran/pendaftaran.validation.js";
 import { catchAsync } from "../utils/catch-async.js";
+import { uploadPhoto } from "../middlewares/upload-photo.js";
 
 const router = express.Router();
 
-router.post("/", validateParticipant, catchAsync(createTransaction));
+router.post(
+  "/",
+  uploadPhoto,
+  validateParticipant,
+  catchAsync(createTransaction)
+);
 router.get("/", catchAsync(getTransactions));
 router.get("/:orderId", catchAsync(getTransactionById));
 router.put(

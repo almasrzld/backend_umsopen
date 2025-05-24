@@ -1,7 +1,6 @@
 import { participantService } from "./pendaftaran.service.js";
 import { reformParticipant } from "../../utils/reform-participant.js";
 import {
-  MIDTRANS_APP_URL,
   MIDTRANS_SERVER_KEY,
   FRONT_END_URL,
   PENDING_PAYMENT,
@@ -20,14 +19,22 @@ export const createTransaction = async (req, res) => {
     user_message,
   } = req.body;
 
+  const photo = req.file;
+  if (!photo) {
+    return res.status(400).json({
+      status: "error",
+      message: "Foto wajib diupload dan harus format PNG",
+    });
+  }
+
   try {
     const { user_kode, orderId } =
       await participantService.generateUserCodeAndOrderId();
 
     const gross_amount = 50000;
-    const authString = Buffer.from(`${MIDTRANS_SERVER_KEY}:`).toString(
-      "base64"
-    );
+    const authString = Buffer.from(
+      `SB-Mid-server-MxK8V-SjJIFTf_xtTa39jHbq:`
+    ).toString("base64");
     const payload = {
       transaction_details: { order_id: orderId, gross_amount },
       customer_details: {
@@ -42,15 +49,18 @@ export const createTransaction = async (req, res) => {
       },
     };
 
-    const response = await fetch(`${MIDTRANS_APP_URL}/snap/v1/transactions`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        Authorization: `Basic ${authString}`,
-      },
-      body: JSON.stringify(payload),
-    });
+    const response = await fetch(
+      `https://app.sandbox.midtrans.com/snap/v1/transactions`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: `Basic ${authString}`,
+        },
+        body: JSON.stringify(payload),
+      }
+    );
     const data = await response.json();
 
     if (response.status !== 201) {
@@ -68,6 +78,7 @@ export const createTransaction = async (req, res) => {
       user_phone,
       user_category,
       user_institution,
+      photo: `/uploads/photos/${photo.filename}`,
       user_message,
       status: PENDING_PAYMENT,
       snap_token: data.token,

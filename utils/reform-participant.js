@@ -10,6 +10,7 @@ export const reformParticipant = (participant) => {
     user_institution: participant.user_institution,
     user_message: participant.user_message,
     status: participant.status,
+    photo: participant.photo,
     snap_token: participant.snap_token,
     snap_redirect_url: participant.snap_redirect_url,
     createdAt: participant.createdAt,

@@ -1,5 +1,4 @@
 import { PrismaClient } from "@prisma/client";
-// import { PENDING_PAYMENT } from "../../utils/constant.js";
 
 const prisma = new PrismaClient();
 
@@ -25,6 +24,7 @@ class ParticipantService {
     user_phone,
     user_category,
     user_institution,
+    photo = req.file?.path,
     user_message,
     status,
     snap_token = null,
@@ -40,6 +40,7 @@ class ParticipantService {
         user_phone,
         user_category,
         user_institution,
+        photo,
         user_message,
         status,
         snap_token,
