@@ -24,20 +24,27 @@ class BaganService {
       select: {
         user_kode: true,
         user_name: true,
+        photo: true,
       },
     });
 
     const participantMap = Object.fromEntries(
-      participants.map((p) => [p.user_kode, p.user_name])
+      participants.map((p) => [
+        p.user_kode,
+        {
+          nama: p.user_name,
+          foto: p.photo,
+        },
+      ])
     );
 
     // Tambahkan nama peserta ke setiap match
     const matchesWithNames = matches.map((m) => ({
       ...m,
-      participant1_name: m.participant1
+      participant1_info: m.participant1
         ? participantMap[m.participant1] ?? null
         : null,
-      participant2_name: m.participant2
+      participant2_info: m.participant2
         ? participantMap[m.participant2] ?? null
         : null,
     }));

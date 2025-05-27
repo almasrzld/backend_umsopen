@@ -38,3 +38,20 @@ export const fetchParticipantsByCategory = async (req, res) => {
     data: participants.map(reformParticipant),
   });
 };
+
+export const fetchStatistics = async (req, res) => {
+  try {
+    const stats = await participantService.getStatistics();
+
+    res.json({
+      status: "success",
+      data: stats,
+    });
+  } catch (error) {
+    console.error("Failed to fetch statistics:", error);
+    res.status(500).json({
+      status: "error",
+      message: "Failed to fetch statistics",
+    });
+  }
+};
