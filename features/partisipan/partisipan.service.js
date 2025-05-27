@@ -8,6 +8,12 @@ class ParticipantService {
       where: { id },
     });
   }
+
+  async getParticipantsByCategory(category) {
+    return prisma.participant.findMany({
+      where: { user_category: category },
+    });
+  }
 }
 
 export const participantService = new ParticipantService();

@@ -2,6 +2,7 @@ import express from "express";
 import authRoutes from "./auth.routes.js";
 import pendaftaranRoutes from "./pendaftaran.routes.js";
 import partisipanRoutes from "./partisipan.routes.js";
+import baganRoutes from "./bagan.routes.js";
 
 const router = express.Router();
 
@@ -17,5 +18,8 @@ router.use("/v1/api/pendaftaran", pendaftaranRoutes);
 
 // partisipan
 router.use("/v1/api/partisipan", partisipanRoutes);
+
+// bagan
+router.use("/v1/api/bagan", baganRoutes);
 
 export default router;

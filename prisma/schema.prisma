@@ -52,3 +52,35 @@ enum transactions_status {
   PAID
   CANCELED
 }
+
+model Bagan {
+  id           String      @id @default(auto()) @map("_id") @db.ObjectId
+  round        Int
+  indexInRound Int
+  category     String
+  participant1 String?
+  participant2 String?
+  winner       String?
+  score1       Int?
+  score2       Int?
+  win_method   WinMethod?
+  status       MatchStatus @default(SCHEDULED)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@index([category])
+  @@map("bagans")
+}
+
+enum MatchStatus {
+  SCHEDULED
+  ONGOING
+  COMPLETED
+}
+
+enum WinMethod {
+  POINTS
+  KO
+  WO
+  DRAW
+}
