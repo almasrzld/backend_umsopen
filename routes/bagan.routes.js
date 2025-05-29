@@ -1,8 +1,10 @@
 import express from "express";
 import {
   getBagan,
+  getBaganByCategory,
   createBagan,
   updateMatchResult,
+  deleteBaganByCategory,
   deleteAllBaganHandler,
 } from "../features/bagan/index.js";
 import {
@@ -15,7 +17,10 @@ const router = express.Router();
 
 router.post("/", validateCreateBagan, catchAsync(createBagan));
 router.get("/", catchAsync(getBagan));
-router.put("/:id", validateUpdateMatchResult, catchAsync(updateMatchResult));
+router.get("/:category", catchAsync(getBaganByCategory));
+router.patch("/:id", validateUpdateMatchResult, catchAsync(updateMatchResult));
+// !! Hapus bagan berdasarkan kategori
+router.delete("/:category", catchAsync(deleteBaganByCategory));
 // !! Hapus semua bagan
 router.delete("/", catchAsync(deleteAllBaganHandler));
 

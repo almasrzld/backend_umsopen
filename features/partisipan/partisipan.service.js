@@ -27,8 +27,28 @@ class ParticipantService {
 
   async getParticipantsByCategory(category) {
     return prisma.participant.findMany({
-      where: { user_category: category },
+      where: { user_category: category, status: "PAID" },
     });
+  }
+
+  async getInstitutionStats() {
+    const result = await prisma.participant.groupBy({
+      by: ["user_institution"],
+      _count: true,
+      where: {
+        status: "PAID",
+      },
+    });
+
+    const sorted = result
+      .map((item) => ({
+        name: item.user_institution || "Tidak Diketahui",
+        count: item._count,
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+
+    return sorted;
   }
 }
 

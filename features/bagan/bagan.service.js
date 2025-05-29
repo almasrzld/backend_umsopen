@@ -52,6 +52,54 @@ class BaganService {
     return matchesWithNames;
   }
 
+  // Ambil semua bagan berdasarkan kategori
+  async getBaganByCategory(category) {
+    const matches = await prisma.bagan.findMany({
+      where: { category },
+      orderBy: [{ round: "asc" }, { indexInRound: "asc" }],
+    });
+
+    // Ambil semua kode peserta dari participant1 dan participant2
+    const userCodes = [
+      ...new Set(
+        matches.flatMap((m) => [m.participant1, m.participant2].filter(Boolean))
+      ),
+    ];
+
+    // Ambil data peserta
+    const participants = await prisma.participant.findMany({
+      where: { user_kode: { in: userCodes } },
+      select: {
+        user_kode: true,
+        user_name: true,
+        photo: true,
+      },
+    });
+
+    const participantMap = Object.fromEntries(
+      participants.map((p) => [
+        p.user_kode,
+        {
+          nama: p.user_name,
+          foto: p.photo,
+        },
+      ])
+    );
+
+    // Gabungkan info peserta ke data pertandingan
+    const matchesWithInfo = matches.map((m) => ({
+      ...m,
+      participant1_info: m.participant1
+        ? participantMap[m.participant1] ?? null
+        : null,
+      participant2_info: m.participant2
+        ? participantMap[m.participant2] ?? null
+        : null,
+    }));
+
+    return matchesWithInfo;
+  }
+
   async generateBracket(category) {
     // 1. Ambil peserta PAID dari kategori
     const participants = await prisma.participant.findMany({
@@ -101,7 +149,7 @@ class BaganService {
           status: "SCHEDULED",
         });
 
-        nextRound.push(null); // placeholder untuk pemenang
+        nextRound.push(null);
       }
 
       currentPlayers = nextRound;
@@ -155,6 +203,13 @@ class BaganService {
       data: {
         [position]: match.winner,
       },
+    });
+  }
+
+  // !! Hapus semua bagan berdasarkan kategori
+  async deleteBaganByCategory(category) {
+    await prisma.bagan.deleteMany({
+      where: { category },
     });
   }
 

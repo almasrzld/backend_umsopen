@@ -18,6 +18,28 @@ export const getBagan = async (req, res) => {
   }
 };
 
+export const getBaganByCategory = async (req, res) => {
+  try {
+    const { category } = req.params;
+
+    if (!category) {
+      return res.status(400).json({ message: "Kategori wajib diisi" });
+    }
+
+    const data = await baganService.getBaganByCategory(category);
+
+    return res.status(200).json({
+      message: `Bagan kategori ${category} berhasil dimuat`,
+      data,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: "Gagal memuat data bagan per kategori",
+      error: err.message,
+    });
+  }
+};
+
 export const createBagan = async (req, res) => {
   try {
     const { category } = req.body;
@@ -47,14 +69,12 @@ export const updateMatchResult = async (req, res) => {
 
     const validWinMethods = ["POINTS", "KO", "WO", "DRAW"];
 
-    // Validasi input
     if (!winner || !win_method || !validWinMethods.includes(win_method)) {
       return res.status(400).json({
         message: "Winner dan win_method wajib diisi dan valid",
       });
     }
 
-    // score bisa optional jika WO/KO/DRAW
     if (
       win_method === "POINTS" &&
       (typeof score1 !== "number" || typeof score2 !== "number")
@@ -79,6 +99,29 @@ export const updateMatchResult = async (req, res) => {
     console.error("Update match result error:", error);
     res.status(500).json({
       message: "Gagal memperbarui hasil pertandingan",
+      error: error.message,
+    });
+  }
+};
+
+// Hapus bagan berdasarkan kategori
+export const deleteBaganByCategory = async (req, res) => {
+  try {
+    const { category } = req.params;
+
+    if (!category) {
+      return res.status(400).json({ message: "Kategori wajib diisi" });
+    }
+
+    await baganService.deleteBaganByCategory(category);
+
+    res.status(200).json({
+      message: `Bagan untuk kategori '${category}' berhasil dihapus.`,
+    });
+  } catch (error) {
+    console.error("Gagal menghapus bagan:", error);
+    res.status(500).json({
+      message: "Gagal menghapus bagan berdasarkan kategori",
       error: error.message,
     });
   }
