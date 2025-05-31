@@ -206,6 +206,49 @@ class BaganService {
     });
   }
 
+  // Reset hasil pertandingan (score, winner, method, status)
+  async resetMatch(id) {
+    // Ambil data match yang ingin direset
+    const match = await prisma.bagan.findUnique({ where: { id } });
+    if (!match) throw new Error("Match tidak ditemukan");
+
+    // Hapus data match ini
+    await prisma.bagan.update({
+      where: { id },
+      data: {
+        score1: null,
+        score2: null,
+        winner: null,
+        win_method: null,
+        status: "SCHEDULED",
+      },
+    });
+
+    // Hapus pemenang dari ronde berikutnya jika sudah di-set
+    const nextMatchIndex = Math.floor(match.indexInRound / 2);
+    const position =
+      match.indexInRound % 2 === 0 ? "participant1" : "participant2";
+
+    const nextMatch = await prisma.bagan.findFirst({
+      where: {
+        category: match.category,
+        round: match.round + 1,
+      },
+      orderBy: { indexInRound: "asc" },
+      skip: nextMatchIndex,
+      take: 1,
+    });
+
+    if (nextMatch && nextMatch[position] === match.winner) {
+      await prisma.bagan.update({
+        where: { id: nextMatch.id },
+        data: {
+          [position]: null,
+        },
+      });
+    }
+  }
+
   // !! Hapus semua bagan berdasarkan kategori
   async deleteBaganByCategory(category) {
     await prisma.bagan.deleteMany({

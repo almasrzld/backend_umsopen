@@ -4,6 +4,7 @@ import {
   getBaganByCategory,
   createBagan,
   updateMatchResult,
+  resetMatch,
   deleteBaganByCategory,
   deleteAllBaganHandler,
 } from "../features/bagan/index.js";
@@ -19,6 +20,7 @@ router.post("/", validateCreateBagan, catchAsync(createBagan));
 router.get("/", catchAsync(getBagan));
 router.get("/:category", catchAsync(getBaganByCategory));
 router.patch("/:id", validateUpdateMatchResult, catchAsync(updateMatchResult));
+router.patch("/:id/reset", catchAsync(resetMatch));
 // !! Hapus bagan berdasarkan kategori
 router.delete("/:category", catchAsync(deleteBaganByCategory));
 // !! Hapus semua bagan

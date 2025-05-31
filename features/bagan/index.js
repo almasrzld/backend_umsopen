@@ -77,7 +77,10 @@ export const updateMatchResult = async (req, res) => {
 
     if (
       win_method === "POINTS" &&
-      (typeof score1 !== "number" || typeof score2 !== "number")
+      (typeof score1 !== "number" ||
+        typeof score2 !== "number" ||
+        isNaN(score1) ||
+        isNaN(score2))
     ) {
       return res.status(400).json({
         message: "Score1 dan Score2 wajib diisi untuk kemenangan POINTS",
@@ -101,6 +104,21 @@ export const updateMatchResult = async (req, res) => {
       message: "Gagal memperbarui hasil pertandingan",
       error: error.message,
     });
+  }
+};
+
+export const resetMatch = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await baganService.resetMatch(id);
+    res.status(200).json({
+      message: "Pertandingan berhasil direset",
+      data: result,
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Gagal mereset pertandingan", error: error.message });
   }
 };
 
@@ -129,6 +147,13 @@ export const deleteBaganByCategory = async (req, res) => {
 
 // !! Hapus semua bagan
 export const deleteAllBaganHandler = async (req, res) => {
-  await baganService.deleteAllBagan();
-  res.json({ message: "Semua data bagan berhasil dihapus." });
+  try {
+    await baganService.deleteAllBagan();
+    res.status(200).json({ message: "Semua data bagan berhasil dihapus." });
+  } catch (error) {
+    res.status(500).json({
+      message: "Gagal menghapus semua data bagan",
+      error: error.message,
+    });
+  }
 };
