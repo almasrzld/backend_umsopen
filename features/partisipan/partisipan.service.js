@@ -50,6 +50,18 @@ class ParticipantService {
 
     return sorted;
   }
+
+  // !! Hati-hati, fungsi ini akan menghapus semua data peserta
+  async deleteAllParticipants() {
+    // 1. Hapus semua data peserta
+    await prisma.participant.deleteMany({});
+
+    // 2. Reset counter untuk user_kode
+    await prisma.counter.update({
+      where: { name: "participant" },
+      data: { seq: 1 },
+    });
+  }
 }
 
 export const participantService = new ParticipantService();

@@ -66,3 +66,22 @@ export const fetchInstitutionStats = async (req, res) => {
     res.status(500).json({ message: "Gagal memuat data", error: err.message });
   }
 };
+
+// !! Hati-hati, fungsi ini akan menghapus semua data peserta
+export const deleteAllParticipantsHandler = async (req, res) => {
+  try {
+    await participantService.deleteAllParticipants();
+
+    res.status(200).json({
+      status: "success",
+      message: "Semua peserta berhasil dihapus dan counter di-reset.",
+    });
+  } catch (error) {
+    console.error("Error resetting participants:", error);
+    res.status(500).json({
+      status: "error",
+      message: "Terjadi kesalahan saat mereset peserta.",
+      error: error.message,
+    });
+  }
+};
