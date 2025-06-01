@@ -24,7 +24,7 @@ class ParticipantService {
     user_phone,
     user_category,
     user_institution,
-    photo = req.file?.path,
+    photo,
     user_message,
     status,
     snap_token = null,

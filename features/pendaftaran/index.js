@@ -20,6 +20,10 @@ export const createTransaction = async (req, res) => {
     user_message,
   } = req.body;
 
+  console.log("--- Debugging req.file in createTransaction ---");
+  console.log("req.file:", req.file);
+  console.log("--------------------------------------------");
+
   if (!req.file) {
     return res.status(400).json({
       status: "error",
