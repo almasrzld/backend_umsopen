@@ -20,11 +20,10 @@ export const createTransaction = async (req, res) => {
     user_message,
   } = req.body;
 
-  const photo = req.file;
-  if (!photo) {
+  if (!req.file) {
     return res.status(400).json({
       status: "error",
-      message: "Foto wajib diupload dan harus format PNG",
+      message: "Foto wajib diupload dan harus format JPG, JPEG, dan PNG",
     });
   }
 
@@ -76,7 +75,7 @@ export const createTransaction = async (req, res) => {
       user_phone,
       user_category,
       user_institution,
-      photo: `/uploads/photos/${photo.filename}`,
+      photo: req.file.path,
       user_message,
       status: PENDING_PAYMENT,
       snap_token: data.token,

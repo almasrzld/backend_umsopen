@@ -1,20 +1,31 @@
 import multer from "multer";
+import { v2 as cloudinary } from "cloudinary";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
 import path from "path";
-import fs from "fs";
 
-const uploadDir = path.join(process.cwd(), "uploads", "photos");
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+  secure: true,
+});
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, uploadDir);
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    const ext = path.extname(file.originalname);
-    cb(null, `photo-${uniqueSuffix}${ext}`);
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "ums-open-photos",
+    format: async (req, file) => {
+      const ext = file.mimetype.split("/")[1];
+      if (["png", "jpeg", "jpg"].includes(ext)) {
+        return ext === "jpeg" ? "jpg" : ext;
+      }
+      return "png";
+    },
+    public_id: (req, file) => {
+      const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+      const originalNameWithoutExt = path.parse(file.originalname).name;
+      return `photo-${originalNameWithoutExt}-${uniqueSuffix}`;
+    },
   },
 });
 
@@ -26,7 +37,7 @@ const fileFilter = (req, file, cb) => {
     cb(
       new multer.MulterError(
         "LIMIT_UNEXPECTED_FILE",
-        "Hanya gambar PNG/JPG yang diizinkan"
+        "Hanya gambar PNG, JPEG, atau JPG yang diizinkan."
       )
     );
   }
