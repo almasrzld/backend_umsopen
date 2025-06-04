@@ -9,8 +9,8 @@ export const getMe = async (req, res) => {
 };
 
 export const register = async (req, res) => {
-  const { email, password } = req.body;
-  const result = await authService.register({ email, password });
+  const { email, username, password } = req.body;
+  const result = await authService.register({ email, username, password });
 
   res.status(201).json({
     message: result.message,
@@ -25,4 +25,14 @@ export const login = async (req, res) => {
     message: result.message,
     data: result.data,
   });
+};
+
+export const deleteAdmin = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await authService.deleteAdmin({ id });
+    res.json({ message: result.message });
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ message: error.message });
+  }
 };

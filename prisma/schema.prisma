@@ -11,6 +11,7 @@ model Admin {
   id       String @id @default(auto()) @map("_id") @db.ObjectId
   v        Int    @map("__v")
   email    String @unique(map: "email_1")
+  username String
   password String
 
   @@map("admins")

@@ -1,5 +1,5 @@
 import express from "express";
-import { register, login, getMe } from "../features/auth/index.js";
+import { register, login, getMe, deleteAdmin } from "../features/auth/index.js";
 import {
   validateRegister,
   validateLogin,
@@ -12,5 +12,6 @@ const router = express.Router();
 router.post("/register", validateRegister, catchAsync(register));
 router.post("/login", validateLogin, catchAsync(login));
 router.get("/me", verifyToken, catchAsync(getMe));
+router.delete("/delete/:id", verifyToken, catchAsync(deleteAdmin));
 
 export default router;

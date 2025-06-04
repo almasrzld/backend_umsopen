@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 const prisma = new PrismaClient();
 
 class AuthService {
-  async register({ email, password }) {
+  async register({ email, username, password }) {
     const existing = await prisma.admin.findUnique({ where: { email } });
 
     if (existing) {
@@ -19,6 +19,7 @@ class AuthService {
     await prisma.admin.create({
       data: {
         email,
+        username,
         password: hashedPassword,
         v: 0,
       },
@@ -62,6 +63,7 @@ class AuthService {
       select: {
         id: true,
         email: true,
+        username: true,
       },
     });
 
@@ -72,6 +74,18 @@ class AuthService {
     }
 
     return admin;
+  }
+
+  async deleteAdmin({ id }) {
+    const admin = await prisma.admin.findUnique({ where: { id } });
+    if (!admin) {
+      const error = new Error("Admin tidak ditemukan");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    await prisma.admin.delete({ where: { id } });
+    return { message: "Admin berhasil dihapus" };
   }
 }
 
