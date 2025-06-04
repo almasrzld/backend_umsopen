@@ -6,7 +6,7 @@ class ParticipantService {
   async getAllParticipants() {
     return prisma.participant.findMany({
       orderBy: {
-        createdAt: "desc",
+        createdAt: "asc",
       },
     });
   }
