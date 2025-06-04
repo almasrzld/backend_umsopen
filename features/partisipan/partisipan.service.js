@@ -3,6 +3,14 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 class ParticipantService {
+  async getAllParticipants() {
+    return prisma.participant.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  }
+
   async getStatistics() {
     const participants = await prisma.participant.count({
       where: { status: "PAID" },

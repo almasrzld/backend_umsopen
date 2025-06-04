@@ -1,6 +1,24 @@
 import { participantService } from "./partisipan.service.js";
 import { reformParticipant } from "../../utils/reform-participant.js";
 
+export const fetchAllParticipants = async (req, res) => {
+  try {
+    const participants = await participantService.getAllParticipants();
+
+    res.status(200).json({
+      status: "success",
+      data: participants.map(reformParticipant),
+    });
+  } catch (error) {
+    console.error("Error fetching all participants:", error);
+    res.status(500).json({
+      status: "error",
+      message: "Gagal mengambil data peserta.",
+      error: error.message,
+    });
+  }
+};
+
 export const fetchParticipant = async (req, res) => {
   const { id } = req.params;
 

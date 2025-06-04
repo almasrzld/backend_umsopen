@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  fetchAllParticipants,
   fetchParticipant,
   fetchParticipantsByCategory,
   fetchStatistics,
@@ -10,6 +11,7 @@ import { catchAsync } from "../utils/catch-async.js";
 
 const router = express.Router();
 
+router.get("/", catchAsync(fetchAllParticipants));
 router.get("/statistic", catchAsync(fetchStatistics));
 router.get("/institution", catchAsync(fetchInstitutionStats));
 router.get("/by-category", catchAsync(fetchParticipantsByCategory));
