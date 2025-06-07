@@ -66,6 +66,8 @@ model Bagan {
   score2       Int?
   win_method   WinMethod?
   status       MatchStatus @default(SCHEDULED)
+  isSemifinal  Boolean?    @default(false)
+  isThirdPlace Boolean?    @default(false)
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
 

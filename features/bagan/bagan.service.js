@@ -130,6 +130,7 @@ class BaganService {
     }
 
     // 4. Buat pertandingan per ronde
+    const totalRounds = Math.log2(totalSlot);
     const matches = [];
     let round = 1;
     let currentPlayers = [...shuffled];
@@ -147,6 +148,7 @@ class BaganService {
           participant1: p1,
           participant2: p2,
           status: "SCHEDULED",
+          isSemifinal: totalRounds - round === 1,
         });
 
         nextRound.push(null);
@@ -177,6 +179,10 @@ class BaganService {
 
     await this.advanceWinnerToNextRound(match);
 
+    if (match.isSemifinal) {
+      await this.handleThirdPlaceMatch(match.category, match.round);
+    }
+
     return match;
   }
 
@@ -190,6 +196,7 @@ class BaganService {
       where: {
         category: match.category,
         round: match.round + 1,
+        isThirdPlace: false,
       },
       orderBy: { indexInRound: "asc" },
       skip: nextMatchIndex,
@@ -202,6 +209,45 @@ class BaganService {
       where: { id: nextMatch.id },
       data: {
         [position]: match.winner,
+      },
+    });
+  }
+
+  async handleThirdPlaceMatch(category, semifinalRound) {
+    const semifinalMatches = await prisma.bagan.findMany({
+      where: {
+        category,
+        round: semifinalRound,
+        isSemifinal: true,
+      },
+      orderBy: { indexInRound: "asc" },
+    });
+
+    const completed = semifinalMatches.filter((m) => m.status === "COMPLETED");
+    if (completed.length < 2) return;
+
+    const exists = await prisma.bagan.findFirst({
+      where: {
+        category,
+        round: semifinalRound + 1,
+        isThirdPlace: true,
+      },
+    });
+    if (exists) return;
+
+    const losers = completed.map((m) =>
+      m.winner === m.participant1 ? m.participant2 : m.participant1
+    );
+
+    await prisma.bagan.create({
+      data: {
+        round: semifinalRound + 1,
+        category,
+        indexInRound: 1, // 0 = final, 1 = perebutan juara 3
+        participant1: losers[0],
+        participant2: losers[1],
+        status: "SCHEDULED",
+        isThirdPlace: true,
       },
     });
   }
@@ -233,6 +279,7 @@ class BaganService {
       where: {
         category: match.category,
         round: match.round + 1,
+        isThirdPlace: false,
       },
       orderBy: { indexInRound: "asc" },
       skip: nextMatchIndex,
