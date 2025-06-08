@@ -24,6 +24,7 @@ class BaganService {
       select: {
         user_kode: true,
         user_name: true,
+        user_institution: true,
         photo: true,
       },
     });
@@ -34,6 +35,7 @@ class BaganService {
         {
           nama: p.user_name,
           foto: p.photo,
+          institusi: p.user_institution,
         },
       ])
     );
