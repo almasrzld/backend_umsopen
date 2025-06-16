@@ -2,8 +2,13 @@ import { participantService } from "./partisipan.service.js";
 import { reformParticipant } from "../../utils/reform-participant.js";
 
 export const fetchAllParticipants = async (req, res) => {
+  const { status = "ALL" } = req.query;
+
   try {
-    const participants = await participantService.getAllParticipants();
+    const participants =
+      status && status !== "ALL"
+        ? await participantService.getParticipantsByStatus(status)
+        : await participantService.getAllParticipants();
 
     res.status(200).json({
       status: "success",

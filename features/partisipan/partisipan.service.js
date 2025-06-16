@@ -11,6 +11,17 @@ class ParticipantService {
     });
   }
 
+  async getParticipantsByStatus(status) {
+    return prisma.participant.findMany({
+      where: {
+        status,
+      },
+      orderBy: {
+        createdAt: "asc",
+      },
+    });
+  }
+
   async getStatistics() {
     const participants = await prisma.participant.count({
       where: { status: "PAID" },
