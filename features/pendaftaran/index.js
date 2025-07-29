@@ -15,7 +15,7 @@ export const createTransaction = async (req, res) => {
     user_name,
     user_email,
     user_phone,
-    user_category,
+    categoryId,
     user_institution,
     user_message,
   } = req.body;
@@ -73,7 +73,7 @@ export const createTransaction = async (req, res) => {
       user_name,
       user_email,
       user_phone,
-      user_category,
+      categoryId,
       user_institution,
       photo: req.file.path,
       user_message,

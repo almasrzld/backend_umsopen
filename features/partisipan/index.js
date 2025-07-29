@@ -43,9 +43,9 @@ export const fetchParticipant = async (req, res) => {
 };
 
 export const fetchParticipantsByCategory = async (req, res) => {
-  const { category } = req.query;
+  const { categoryId } = req.query;
 
-  if (!category) {
+  if (!categoryId) {
     return res.status(400).json({
       status: "error",
       message: "Category is required",
@@ -53,7 +53,7 @@ export const fetchParticipantsByCategory = async (req, res) => {
   }
 
   const participants = await participantService.getParticipantsByCategory(
-    category
+    categoryId
   );
 
   res.json({
@@ -87,6 +87,21 @@ export const fetchInstitutionStats = async (req, res) => {
       .json({ message: "Berhasil memuat statistik asal institusi", data });
   } catch (err) {
     res.status(500).json({ message: "Gagal memuat data", error: err.message });
+  }
+};
+
+export const deleteParticipantById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = await participantService.deleteParticipantById(id);
+
+    return res.status(200).json({
+      message: "Peserta berhasil dihapus",
+      data: deleted,
+    });
+  } catch (error) {
+    console.error("Error deleteParticipantById:", error);
+    return res.status(500).json({ message: error.message });
   }
 };
 

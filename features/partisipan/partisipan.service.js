@@ -5,9 +5,8 @@ const prisma = new PrismaClient();
 class ParticipantService {
   async getAllParticipants() {
     return prisma.participant.findMany({
-      orderBy: {
-        createdAt: "asc",
-      },
+      orderBy: { createdAt: "asc" },
+      include: { category: true },
     });
   }
 
@@ -28,7 +27,7 @@ class ParticipantService {
     });
 
     const categories = await prisma.participant.groupBy({
-      by: ["user_category"],
+      by: ["categoryId"],
       _count: true,
     });
 
@@ -41,12 +40,14 @@ class ParticipantService {
   async getParticipantById(id) {
     return prisma.participant.findUnique({
       where: { id },
+      include: { category: true },
     });
   }
 
-  async getParticipantsByCategory(category) {
+  async getParticipantsByCategory(categoryId) {
     return prisma.participant.findMany({
-      where: { user_category: category, status: "PAID" },
+      where: { categoryId, status: "PAID" },
+      include: { category: true },
     });
   }
 
@@ -68,6 +69,12 @@ class ParticipantService {
       .slice(0, 10);
 
     return sorted;
+  }
+
+  async deleteParticipantById(id) {
+    return prisma.participant.delete({
+      where: { id },
+    });
   }
 
   // !! Hati-hati, fungsi ini akan menghapus semua data peserta

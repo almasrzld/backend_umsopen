@@ -24,7 +24,7 @@ export const validateParticipant = [
       "Nomor telepon harus berupa nomor telepon Indonesia yang valid"
     ),
 
-  check("user_category")
+  check("categoryId")
     .notEmpty()
     .withMessage("Kategori peserta tidak boleh kosong"),
 
