@@ -168,6 +168,13 @@ class BaganService {
 
   // Update hasil pertandingan & teruskan ke ronde berikutnya
   async updateMatchResult(matchId, { score1, score2, winner, win_method }) {
+    let status = "COMPLETED";
+
+    if (win_method === "DRAW") {
+      winner = null;
+      status = "ONGOING";
+    }
+
     const match = await prisma.bagan.update({
       where: { id: matchId },
       data: {
@@ -175,9 +182,13 @@ class BaganService {
         score2,
         winner,
         win_method,
-        status: "COMPLETED",
+        status,
       },
     });
+
+    if (!winner || win_method === "DRAW") {
+      return match;
+    }
 
     await this.advanceWinnerToNextRound(match);
 

@@ -69,9 +69,15 @@ export const updateMatchResult = async (req, res) => {
 
     const validWinMethods = ["POINTS", "KO", "WO", "DRAW"];
 
-    if (!winner || !win_method || !validWinMethods.includes(win_method)) {
+    if (!win_method || !validWinMethods.includes(win_method)) {
       return res.status(400).json({
-        message: "Winner dan win_method wajib diisi dan valid",
+        message: "win_method wajib diisi dan valid",
+      });
+    }
+
+    if (win_method !== "DRAW" && !winner) {
+      return res.status(400).json({
+        message: "Winner wajib diisi kecuali hasil DRAW",
       });
     }
 
@@ -94,8 +100,15 @@ export const updateMatchResult = async (req, res) => {
       win_method,
     });
 
+    let successMessage = "Hasil pertandingan berhasil diperbarui";
+
+    if (win_method === "DRAW") {
+      successMessage =
+        "Pertandingan berakhir draw, lakukan tanding ulang hingga ada pemenang";
+    }
+
     res.status(200).json({
-      message: "Hasil pertandingan berhasil diperbarui",
+      message: successMessage,
       data: updatedMatch,
     });
   } catch (error) {
