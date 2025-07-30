@@ -6,7 +6,11 @@ export const reformParticipant = (participant) => {
     user_name: participant.user_name,
     user_email: participant.user_email,
     user_phone: participant.user_phone,
-    user_category: participant.user_category,
+    category: {
+      id: participant.category?.id,
+      name: participant.category?.name,
+      label: participant.category?.label,
+    },
     user_institution: participant.user_institution,
     user_message: participant.user_message,
     status: participant.status,

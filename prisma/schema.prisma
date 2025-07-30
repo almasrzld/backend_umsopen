@@ -26,6 +26,17 @@ model Counter {
   @@map("counters")
 }
 
+model Category {
+  id        String      @id @default(auto()) @map("_id") @db.ObjectId
+  name      String      @unique           
+  label     String?                         
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  participants Participant[] @relation("CategoryParticipants")
+  bagans       Bagan[]       @relation("CategoryBagans")
+}
+
 model Participant {
   id                String   @id @default(auto()) @map("_id") @db.ObjectId
   v                 Int      @map("__v")
@@ -34,7 +45,8 @@ model Participant {
   user_name         String?
   user_email        String?
   user_phone        String?
-  user_category     String?
+  categoryId        String?   @db.ObjectId   
+  category          Category? @relation("CategoryParticipants", fields: [categoryId], references: [id])
   user_institution  String?
   user_message      String?
   status            transactions_status
@@ -58,7 +70,8 @@ model Bagan {
   id           String      @id @default(auto()) @map("_id") @db.ObjectId
   round        Int
   indexInRound Int
-  category     String
+  categoryId   String?      @db.ObjectId
+  category     Category?    @relation("CategoryBagans", fields: [categoryId], references: [id])
   participant1 String?
   participant2 String?
   winner       String?
@@ -71,7 +84,7 @@ model Bagan {
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
 
-  @@index([category])
+  @@index([categoryId])
   @@map("bagans")
 }
 

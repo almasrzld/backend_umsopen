@@ -3,7 +3,7 @@ import { errorValidation } from "../../middlewares/error-validation.js";
 
 // Validasi untuk membuat bagan
 export const validateCreateBagan = [
-  check("category").notEmpty().withMessage("Kategori wajib diisi"),
+  check("categoryId").notEmpty().withMessage("Kategori wajib diisi"),
   errorValidation,
 ];
 
@@ -11,7 +11,10 @@ export const validateCreateBagan = [
 export const validateUpdateMatchResult = [
   check("score1").isNumeric().withMessage("Score1 harus berupa angka"),
   check("score2").isNumeric().withMessage("Score2 harus berupa angka"),
-  check("winner").notEmpty().withMessage("Pemenang wajib diisi"),
+  check("winner")
+    .if(check("win_method").not().equals("DRAW"))
+    .notEmpty()
+    .withMessage("Pemenang wajib diisi"),
   check("win_method")
     .notEmpty()
     .isIn(["POINTS", "KO", "WO", "DRAW"])

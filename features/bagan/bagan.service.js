@@ -3,22 +3,29 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 class BaganService {
-  async getAllBagan({ category }) {
-    const where = category ? { category } : {};
+  async getAllBagan({ categoryId }) {
+    const where = categoryId ? { categoryId } : {};
 
+    // Ambil semua match
     const matches = await prisma.bagan.findMany({
       where,
-      orderBy: [{ round: "asc" }, { indexInRound: "asc" }],
+      orderBy: [
+        { categoryId: "asc" },
+        { round: "asc" },
+        { indexInRound: "asc" },
+      ],
     });
 
-    // Ambil semua kode user yang muncul
+    if (!matches.length) return [];
+
+    // Ambil semua kode peserta
     const userCodes = [
       ...new Set(
         matches.flatMap((m) => [m.participant1, m.participant2].filter(Boolean))
       ),
     ];
 
-    // Ambil data peserta terkait
+    // Ambil data peserta
     const participants = await prisma.participant.findMany({
       where: { user_kode: { in: userCodes } },
       select: {
@@ -40,8 +47,8 @@ class BaganService {
       ])
     );
 
-    // Tambahkan nama peserta ke setiap match
-    const matchesWithNames = matches.map((m) => ({
+    // Tambahkan info peserta
+    const matchesWithInfo = matches.map((m) => ({
       ...m,
       participant1_info: m.participant1
         ? participantMap[m.participant1] ?? null
@@ -51,13 +58,41 @@ class BaganService {
         : null,
     }));
 
-    return matchesWithNames;
+    // Ambil label kategori untuk semua categoryId yang ada
+    const categoryIds = [...new Set(matches.map((m) => m.categoryId))];
+
+    const categories = await prisma.category.findMany({
+      where: { id: { in: categoryIds } },
+      select: { id: true, label: true },
+    });
+
+    const categoryMap = Object.fromEntries(
+      categories.map((c) => [c.id, c.label])
+    );
+
+    // Grouping berdasarkan kategori
+    const grouped = categoryIds.map((id) => ({
+      categoryId: id,
+      label: categoryMap[id] || id,
+      matches: matchesWithInfo.filter((m) => m.categoryId === id),
+    }));
+
+    return grouped;
   }
 
   // Ambil semua bagan berdasarkan kategori
-  async getBaganByCategory(category) {
+  async getBaganByCategory(categoryId) {
+    const category = await prisma.category.findUnique({
+      where: { id: categoryId },
+      select: { label: true },
+    });
+
+    if (!category) {
+      throw new Error("Kategori tidak ditemukan");
+    }
+
     const matches = await prisma.bagan.findMany({
-      where: { category },
+      where: { categoryId },
       orderBy: [{ round: "asc" }, { indexInRound: "asc" }],
     });
 
@@ -99,14 +134,14 @@ class BaganService {
         : null,
     }));
 
-    return matchesWithInfo;
+    return { label: category.label, matchesWithInfo };
   }
 
-  async generateBracket(category) {
+  async generateBracket(categoryId) {
     // 1. Ambil peserta PAID dari kategori
     const participants = await prisma.participant.findMany({
       where: {
-        user_category: category,
+        categoryId,
         status: "PAID",
       },
       select: {
@@ -145,7 +180,7 @@ class BaganService {
 
         matches.push({
           round,
-          category,
+          categoryId,
           indexInRound: i / 2,
           participant1: p1,
           participant2: p2,
@@ -168,6 +203,13 @@ class BaganService {
 
   // Update hasil pertandingan & teruskan ke ronde berikutnya
   async updateMatchResult(matchId, { score1, score2, winner, win_method }) {
+    let status = "COMPLETED";
+
+    if (win_method === "DRAW") {
+      winner = null;
+      status = "ONGOING";
+    }
+
     const match = await prisma.bagan.update({
       where: { id: matchId },
       data: {
@@ -175,14 +217,18 @@ class BaganService {
         score2,
         winner,
         win_method,
-        status: "COMPLETED",
+        status,
       },
     });
+
+    if (!winner || win_method === "DRAW") {
+      return match;
+    }
 
     await this.advanceWinnerToNextRound(match);
 
     if (match.isSemifinal) {
-      await this.handleThirdPlaceMatch(match.category, match.round);
+      await this.handleThirdPlaceMatch(match.categoryId, match.round);
     }
 
     return match;
@@ -196,7 +242,7 @@ class BaganService {
 
     const nextMatch = await prisma.bagan.findFirst({
       where: {
-        category: match.category,
+        categoryId: match.categoryId,
         round: match.round + 1,
         isThirdPlace: false,
       },
@@ -215,10 +261,10 @@ class BaganService {
     });
   }
 
-  async handleThirdPlaceMatch(category, semifinalRound) {
+  async handleThirdPlaceMatch(categoryId, semifinalRound) {
     const semifinalMatches = await prisma.bagan.findMany({
       where: {
-        category,
+        categoryId,
         round: semifinalRound,
         isSemifinal: true,
       },
@@ -230,7 +276,7 @@ class BaganService {
 
     const exists = await prisma.bagan.findFirst({
       where: {
-        category,
+        categoryId,
         round: semifinalRound + 1,
         isThirdPlace: true,
       },
@@ -244,7 +290,7 @@ class BaganService {
     await prisma.bagan.create({
       data: {
         round: semifinalRound + 1,
-        category,
+        categoryId,
         indexInRound: 1, // 0 = final, 1 = perebutan juara 3
         participant1: losers[0],
         participant2: losers[1],
@@ -279,7 +325,7 @@ class BaganService {
 
     const nextMatch = await prisma.bagan.findFirst({
       where: {
-        category: match.category,
+        categoryId: match.categoryId,
         round: match.round + 1,
         isThirdPlace: false,
       },
@@ -299,9 +345,9 @@ class BaganService {
   }
 
   // !! Hapus semua bagan berdasarkan kategori
-  async deleteBaganByCategory(category) {
+  async deleteBaganByCategory(categoryId) {
     await prisma.bagan.deleteMany({
-      where: { category },
+      where: { categoryId },
     });
   }
 

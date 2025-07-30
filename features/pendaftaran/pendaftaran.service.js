@@ -22,7 +22,7 @@ class ParticipantService {
     user_name,
     user_email,
     user_phone,
-    user_category,
+    categoryId = null,
     user_institution,
     photo,
     user_message,
@@ -38,7 +38,7 @@ class ParticipantService {
         user_name,
         user_email,
         user_phone,
-        user_category,
+        categoryId,
         user_institution,
         photo,
         user_message,
@@ -72,6 +72,9 @@ class ParticipantService {
         skip,
         take: Number(limit),
         orderBy: { createdAt: "desc" },
+        include: {
+          category: true,
+        },
       }),
       prisma.participant.count({ where }),
     ]);
@@ -83,6 +86,9 @@ class ParticipantService {
     return prisma.participant.findFirst({
       where: {
         orderId: orderId,
+      },
+      include: {
+        category: true,
       },
     });
   }
