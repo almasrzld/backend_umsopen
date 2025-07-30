@@ -28,12 +28,19 @@ class ParticipantService {
 
     const categories = await prisma.participant.groupBy({
       by: ["categoryId"],
+      where: { status: "PAID" },
+      _count: true,
+    });
+
+    const activeBaganCategories = await prisma.bagan.groupBy({
+      by: ["categoryId"],
       _count: true,
     });
 
     return {
       participants,
       categories: categories.length,
+      activeBaganCategories: activeBaganCategories.length,
     };
   }
 
@@ -54,21 +61,21 @@ class ParticipantService {
   async getInstitutionStats() {
     const result = await prisma.participant.groupBy({
       by: ["user_institution"],
-      _count: {
-        user_institution: true,
-      },
+      _count: true,
       where: {
         status: "PAID",
       },
     });
 
-    return result
+    const sorted = result
       .map((item) => ({
-        institution: item.user_institution || "Tidak Diketahui",
-        count: item._count.user_institution,
+        name: item.user_institution || "Tidak Diketahui",
+        count: item._count,
       }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 10);
+
+    return sorted;
   }
 
   async deleteParticipantById(id) {
