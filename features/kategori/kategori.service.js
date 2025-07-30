@@ -17,9 +17,6 @@ class KategoriService {
   // ✅ Get All Categories
   async getAllCategories() {
     const categories = await prisma.category.findMany({
-      include: {
-        participants: true,
-      },
       orderBy: { createdAt: "asc" },
     });
     return categories;
@@ -31,6 +28,14 @@ class KategoriService {
       where: { id },
     });
     return category;
+  }
+
+  // ✅ Delete Category by ID
+  async deleteCategoryById(id) {
+    const deletedCategory = await prisma.category.delete({
+      where: { id },
+    });
+    return deletedCategory;
   }
 }
 
