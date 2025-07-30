@@ -17,6 +17,9 @@ class KategoriService {
   // ✅ Get All Categories
   async getAllCategories() {
     const categories = await prisma.category.findMany({
+      include: {
+        participants: true,
+      },
       orderBy: { createdAt: "asc" },
     });
     return categories;
