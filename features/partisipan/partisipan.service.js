@@ -54,21 +54,21 @@ class ParticipantService {
   async getInstitutionStats() {
     const result = await prisma.participant.groupBy({
       by: ["user_institution"],
-      _count: true,
+      _count: {
+        user_institution: true,
+      },
       where: {
         status: "PAID",
       },
     });
 
-    const sorted = result
+    return result
       .map((item) => ({
-        name: item.user_institution || "Tidak Diketahui",
-        count: item._count,
+        institution: item.user_institution || "Tidak Diketahui",
+        count: item._count.user_institution,
       }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 10);
-
-    return sorted;
   }
 
   async deleteParticipantById(id) {

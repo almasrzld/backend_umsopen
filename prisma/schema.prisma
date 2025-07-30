@@ -70,9 +70,8 @@ model Bagan {
   id           String      @id @default(auto()) @map("_id") @db.ObjectId
   round        Int
   indexInRound Int
-  category     String
   categoryId   String?      @db.ObjectId
-  categoryRef  Category?    @relation("CategoryBagans", fields: [categoryId], references: [id])
+  category     Category?    @relation("CategoryBagans", fields: [categoryId], references: [id])
   participant1 String?
   participant2 String?
   winner       String?
@@ -85,7 +84,7 @@ model Bagan {
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
 
-  @@index([category])
+  @@index([categoryId])
   @@map("bagans")
 }
 

@@ -3,7 +3,7 @@ import { errorValidation } from "../../middlewares/error-validation.js";
 
 // Validasi untuk membuat bagan
 export const validateCreateBagan = [
-  check("category").notEmpty().withMessage("Kategori wajib diisi"),
+  check("categoryId").notEmpty().withMessage("Kategori wajib diisi"),
   errorValidation,
 ];
 

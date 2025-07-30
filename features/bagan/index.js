@@ -2,9 +2,9 @@ import { baganService } from "./bagan.service.js";
 
 export const getBagan = async (req, res) => {
   try {
-    const { category } = req.query;
+    const { categoryId } = req.query;
 
-    const data = await baganService.getAllBagan({ category });
+    const data = await baganService.getAllBagan({ categoryId });
 
     return res.status(200).json({
       message: "Data bagan berhasil dimuat",
@@ -20,16 +20,16 @@ export const getBagan = async (req, res) => {
 
 export const getBaganByCategory = async (req, res) => {
   try {
-    const { category } = req.params;
+    const { categoryId } = req.params;
 
-    if (!category) {
+    if (!categoryId) {
       return res.status(400).json({ message: "Kategori wajib diisi" });
     }
 
-    const data = await baganService.getBaganByCategory(category);
+    const data = await baganService.getBaganByCategory(categoryId);
 
     return res.status(200).json({
-      message: `Bagan kategori ${category} berhasil dimuat`,
+      message: `Bagan kategori ${data.label} berhasil dimuat`,
       data,
     });
   } catch (err) {
@@ -42,13 +42,13 @@ export const getBaganByCategory = async (req, res) => {
 
 export const createBagan = async (req, res) => {
   try {
-    const { category } = req.body;
+    const { categoryId } = req.body;
 
-    if (!category) {
+    if (!categoryId) {
       return res.status(400).json({ message: "Kategori wajib diisi" });
     }
 
-    const data = await baganService.generateBracket(category);
+    const data = await baganService.generateBracket(categoryId);
 
     return res.status(201).json({
       message: "Bagan berhasil dibuat",
@@ -138,16 +138,16 @@ export const resetMatch = async (req, res) => {
 // Hapus bagan berdasarkan kategori
 export const deleteBaganByCategory = async (req, res) => {
   try {
-    const { category } = req.params;
+    const { categoryId } = req.params;
 
-    if (!category) {
+    if (!categoryId) {
       return res.status(400).json({ message: "Kategori wajib diisi" });
     }
 
-    await baganService.deleteBaganByCategory(category);
+    await baganService.deleteBaganByCategory(categoryId);
 
     res.status(200).json({
-      message: `Bagan untuk kategori '${category}' berhasil dihapus.`,
+      message: `Bagan untuk kategori '${categoryId}' berhasil dihapus.`,
     });
   } catch (error) {
     console.error("Gagal menghapus bagan:", error);
